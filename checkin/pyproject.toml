@@ -1,0 +1,17 @@
+[project]
+name = "checkin"
+description = "Conference checkin server"
+authors = [{ name = "k4yt3x", email = "i@k4yt3x.com" }]
+dependencies = ["flask>=3.0.2"]
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+dynamic = ["version"]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+version = { source = "file", path = "checkin/__init__.py" }
