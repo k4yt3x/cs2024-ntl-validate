@@ -1,8 +1,8 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
-#include <openssl/rc4.h>
 #include <openssl/sha.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ptrace.h>
@@ -40,8 +40,12 @@
         return x;            \
     }
 
-// allocate some space for the xor key
-unsigned char MESSAGE_XOR_KEY[27];
+// allocate space for the xor key
+// data in this memory will be used as
+//   - the message xor key
+//   - the AES 256 IV, and
+//   - the XTEA key for decrypting the AES 256 key
+unsigned char MESSAGE_XOR_KEY[59];
 
 void decrypt_message_xor_key()
 {
@@ -413,6 +417,31 @@ handle_encryption_errors(EVP_CIPHER_CTX *ctx, unsigned char **plaintext)
 }
 
 /**
+ * @brief decrypt a message using XTEA
+ *
+ * @param[in] num_rounds the number of encryption rounds
+ */
+void xtea_decipher(
+    unsigned int num_rounds,
+    uint32_t v[2],
+    uint32_t const key[4]
+)
+{
+    FAKE_CALL;
+    FAKE_INVALID_JUMP_A;
+
+    unsigned int i;
+    uint32_t v0 = v[0], v1 = v[1], delta = 0x9E3779B9, sum = delta * num_rounds;
+    for (i = 0; i < num_rounds; i++) {
+        v1 -= (((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + key[(sum >> 11) & 3]);
+        sum -= delta;
+        v0 -= (((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + key[sum & 3]);
+    }
+    v[0] = v0;
+    v[1] = v1;
+}
+
+/**
  * @brief decrypt content using AES-256-CBC
  *
  * @param[in] ciphertext encrypted content
@@ -431,6 +460,121 @@ int aes_256_cbc_decrypt(
 )
 {
     FAKE_CALL;
+
+    // decrypt the AES 256 key using XTEA and append it to the xor key
+    // key: "flag{ReADiNg_AsM_aiNt_thAT_HarD}"
+    int index = 0;
+    char encoded_encrypted_data[45];
+    encoded_encrypted_data[index] = 'i';
+    index++;
+    encoded_encrypted_data[index] = 'e';
+    index++;
+    encoded_encrypted_data[index] = 'n';
+    index++;
+    encoded_encrypted_data[index] = 'l';
+    index++;
+    encoded_encrypted_data[index] = 'Z';
+    index++;
+    encoded_encrypted_data[index] = 'I';
+    index++;
+    encoded_encrypted_data[index] = '2';
+    index++;
+    encoded_encrypted_data[index] = 'O';
+    index++;
+    encoded_encrypted_data[index] = 'P';
+    index++;
+    encoded_encrypted_data[index] = 'W';
+    index++;
+    encoded_encrypted_data[index] = 'T';
+    index++;
+    encoded_encrypted_data[index] = '4';
+    index++;
+    encoded_encrypted_data[index] = 's';
+    index++;
+    encoded_encrypted_data[index] = 'n';
+    index++;
+    encoded_encrypted_data[index] = 'c';
+    index++;
+    encoded_encrypted_data[index] = 'V';
+    index++;
+    encoded_encrypted_data[index] = 'n';
+    index++;
+    encoded_encrypted_data[index] = '1';
+    index++;
+    encoded_encrypted_data[index] = '/';
+    index++;
+    encoded_encrypted_data[index] = 'z';
+    index++;
+    encoded_encrypted_data[index] = '1';
+    index++;
+    encoded_encrypted_data[index] = 'B';
+    index++;
+    encoded_encrypted_data[index] = '7';
+    index++;
+    encoded_encrypted_data[index] = 'H';
+    index++;
+    encoded_encrypted_data[index] = 'd';
+    index++;
+    encoded_encrypted_data[index] = 'p';
+    index++;
+    encoded_encrypted_data[index] = 'M';
+    index++;
+    encoded_encrypted_data[index] = 'E';
+    index++;
+    encoded_encrypted_data[index] = 'N';
+    index++;
+    encoded_encrypted_data[index] = 'E';
+    index++;
+    encoded_encrypted_data[index] = 'E';
+    index++;
+    encoded_encrypted_data[index] = 'n';
+    index++;
+    encoded_encrypted_data[index] = 'F';
+    index++;
+    encoded_encrypted_data[index] = 'U';
+    index++;
+    encoded_encrypted_data[index] = 't';
+    index++;
+    encoded_encrypted_data[index] = 'x';
+    index++;
+    encoded_encrypted_data[index] = 'M';
+    index++;
+    encoded_encrypted_data[index] = 'x';
+    index++;
+    encoded_encrypted_data[index] = '4';
+    index++;
+    encoded_encrypted_data[index] = '3';
+    index++;
+    encoded_encrypted_data[index] = 'k';
+    index++;
+    encoded_encrypted_data[index] = 'B';
+    index++;
+    encoded_encrypted_data[index] = 's';
+    index++;
+    encoded_encrypted_data[index] = '=';
+    index++;
+    encoded_encrypted_data[index] = '\0';
+
+    // copy 16 bytes of the xor key as the XTEA key
+    uint32_t key[4];
+    memcpy(key, MESSAGE_XOR_KEY, 16);
+
+    // decode the encrypted flag data
+    int out_len = 0;
+    unsigned char *decoded_data = base64_decode_type_a(
+        encoded_encrypted_data, strlen(encoded_encrypted_data), &out_len
+    );
+
+    // decrypt the flag data using XTEA
+    for (int i = 0; i < out_len; i += 8) {
+        uint32_t *v = (uint32_t *)(decoded_data + i);
+        xtea_decipher(32, v, key);
+    }
+
+    // append the decoded flag data to the xor key
+    memcpy(MESSAGE_XOR_KEY + 26, decoded_data, 32);
+    free(decoded_data);
+
     FAKE_INVALID_JUMP_A;
 
     if (ciphertext_len <= 0) {
@@ -448,7 +592,7 @@ int aes_256_cbc_decrypt(
         RETURN(handle_encryption_errors(ctx, NULL));
     }
 
-    EVP_CIPHER *cipher = (EVP_CIPHER *)EVP_aes_128_cfb1();
+    volatile EVP_CIPHER *cipher = (EVP_CIPHER *)EVP_aes_128_cfb1();
     cipher = (EVP_CIPHER *)EVP_aes_128_cfb8();
     cipher = (EVP_CIPHER *)EVP_aes_128_cfb128();
     cipher = (EVP_CIPHER *)EVP_aes_128_cfb();
@@ -468,7 +612,7 @@ int aes_256_cbc_decrypt(
                  ctx,
                  (const EVP_CIPHER *)cipher,
                  NULL,
-                 (unsigned char *)"flag{ReADiNg_AsM_aiNt_thAT_HarD}",
+                 MESSAGE_XOR_KEY + 26,
                  MESSAGE_XOR_KEY
              )) {
         RETURN(handle_encryption_errors(ctx, plaintext));
@@ -683,7 +827,7 @@ int validate(const char *name, const char *signature)
     free(decrypted_signature);
     free(decoded_token);
 
-    return result;
+    RETURN(result);
 }
 
 int main(int argc, char **argv)
@@ -806,13 +950,11 @@ int main(int argc, char **argv)
         RETURN(0);
     }
 
-    // if a debugger is attached, crash the program by breaking the stack
+    // detect debugger and sabotage the stack
     long ptrace_result = ptrace(ptrace_request, ptrace_request, NULL, NULL);
     if (ptrace_result == -1) {
         __asm__ volatile("dec %rsp\n");
     }
-
-    // PTRACE_DETACH
     ptrace(ptrace_request + 17, ptrace_request, 1, ptrace_request);
 
     // split the input into token and signature

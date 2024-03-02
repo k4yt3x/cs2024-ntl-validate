@@ -1,9 +1,13 @@
-.PHONY: build debug clean test
+.PHONY: static dynamic debug clean test
 
 SRCDIR=src
 BINDIR=bin
 
-build:
+static:
+	mkdir -p $(BINDIR)
+	gcc -Wall -fPIC -I$(SRCDIR) -no-pie -static -s $(SRCDIR)/validate.c -o $(BINDIR)/validate -L/home/k4yt3x/projects/cybersci/openssl -lssl -lcrypto
+
+dynamic:
 	mkdir -p $(BINDIR)
 	gcc -Wall -fPIC -I$(SRCDIR) -no-pie -lssl -lcrypto -s $(SRCDIR)/validate.c -o $(BINDIR)/validate
 
@@ -14,7 +18,7 @@ debug:
 clean:
 	rm -f $(SRCDIR)/*.o $(BINDIR)/validate
 
-test: build
+test: static
 	@$(BINDIR)/validate SzRZVDNY.4V43VnMchGsi2mF7Opq1zadt3JYvxox+T2M6NJuofuIDwTeX7vvAQqlaXrw67NPv; \
 	ret=$$?; \
 	if [ $$ret -ne 0 ]; then \

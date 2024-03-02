@@ -1,7 +1,6 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
-#include <openssl/rc4.h>
 #include <openssl/sha.h>
 #include <stdio.h>
 #include <stdlib.h>
