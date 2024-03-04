@@ -824,8 +824,9 @@ int validate(const char *name, const char *signature)
         result = 1;
     }
 
-    free(decrypted_signature);
     free(decoded_token);
+    free(decoded_signature);
+    free(decrypted_signature);
 
     RETURN(result);
 }
