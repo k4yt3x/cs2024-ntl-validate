@@ -21,6 +21,14 @@ def main():
     xor_encrypted = xor_encrypt(string, key)
     encoded = base64.b64encode(xor_encrypted)
     print("Encrypted and encoded string:", encoded.decode("utf-8"))
+    print(f"String length: {len(encoded) + 1}\n")
+
+    # print C source code
+    print("int index = 0;")
+    for c in encoded:
+        print("message[index] = '{}';\nindex++;".format(chr(c)))
+    print("message[index] = '\\0';")
+    print("decrypt_print(message);")
 
 
 if __name__ == "__main__":

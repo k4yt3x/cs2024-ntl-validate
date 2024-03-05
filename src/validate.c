@@ -869,6 +869,8 @@ int main(int argc, char **argv)
         : "rax"
     );
 
+    // the index is declared once for all messages
+    // since only one message will be printed
     int index = 0;
 
     if (argc != 2) {
@@ -948,7 +950,7 @@ int main(int argc, char **argv)
         index++;
         message[index] = '\0';
         decrypt_print(message);
-        RETURN(0);
+        RETURN(1);
     }
 
     // detect debugger and sabotage the stack
@@ -965,9 +967,7 @@ int main(int argc, char **argv)
 
     if (!name || !signature) {
         // encrypted string: "Invalid token format.\n"
-        char message[37];
-        message[index] = 'J';
-        index++;
+        char message[33];
         message[index] = 'O';
         index++;
         message[index] = 'g';
@@ -1037,5 +1037,137 @@ int main(int argc, char **argv)
         RETURN(1);
     }
 
-    RETURN(validate(name, signature));
+    int result = validate(name, signature);
+
+    char message[60];
+    // encrypted string: "The token is valid.\n"
+    message[index] = 'J';
+    index++;
+    message[index] = 'w';
+    index++;
+    message[index] = 'A';
+    index++;
+    message[index] = 'g';
+    index++;
+    message[index] = 'b';
+    index++;
+    message[index] = 'B';
+    index++;
+    message[index] = 'g';
+    index++;
+    message[index] = 'B';
+    index++;
+    message[index] = 'L';
+    index++;
+    message[index] = 'h';
+    index++;
+    message[index] = 'M';
+    index++;
+    message[index] = 'L';
+    index++;
+    message[index] = 'U';
+    index++;
+    message[index] = 'i';
+    index++;
+    message[index] = '0';
+    index++;
+    message[index] = 'S';
+    index++;
+    message[index] = 'b';
+    index++;
+    message[index] = 'j';
+    index++;
+    message[index] = 'U';
+    index++;
+    message[index] = 'k';
+    index++;
+    message[index] = 'G';
+    index++;
+    message[index] = 'w';
+    index++;
+    message[index] = 'A';
+    index++;
+    message[index] = 'w';
+    index++;
+    message[index] = 'R';
+    index++;
+    message[index] = 'l';
+    index++;
+    message[index] = '8';
+    index++;
+    message[index] = '=';
+    index++;
+    message[index] = '\0';
+    index++;
+
+    // encrypted string: "The token is invalid.\n"
+    message[index] = 'J';
+    index++;
+    message[index] = 'w';
+    index++;
+    message[index] = 'A';
+    index++;
+    message[index] = 'g';
+    index++;
+    message[index] = 'b';
+    index++;
+    message[index] = 'B';
+    index++;
+    message[index] = 'g';
+    index++;
+    message[index] = 'B';
+    index++;
+    message[index] = 'L';
+    index++;
+    message[index] = 'h';
+    index++;
+    message[index] = 'M';
+    index++;
+    message[index] = 'L';
+    index++;
+    message[index] = 'U';
+    index++;
+    message[index] = 'i';
+    index++;
+    message[index] = '0';
+    index++;
+    message[index] = 'S';
+    index++;
+    message[index] = 'b';
+    index++;
+    message[index] = 'i';
+    index++;
+    message[index] = 'o';
+    index++;
+    message[index] = 'r';
+    index++;
+    message[index] = 'A';
+    index++;
+    message[index] = 'Q';
+    index++;
+    message[index] = 'g';
+    index++;
+    message[index] = '4';
+    index++;
+    message[index] = 'A';
+    index++;
+    message[index] = 'T';
+    index++;
+    message[index] = 'F';
+    index++;
+    message[index] = 'd';
+    index++;
+    message[index] = 'a';
+    index++;
+    message[index] = 'w';
+    index++;
+    message[index] = '=';
+    index++;
+    message[index] = '=';
+    index++;
+    message[index] = '\0';
+
+    decrypt_print(message + (result == 1) * 29);
+
+    RETURN(result);
 }
