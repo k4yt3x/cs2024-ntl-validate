@@ -47,8 +47,7 @@
 //   - the XTEA key for decrypting the AES 256 key
 unsigned char MESSAGE_XOR_KEY[59];
 
-void decrypt_message_xor_key()
-{
+void decrypt_message_xor_key() {
     // decrypt the xor key
     // this is used both as the message decryption key and the AES 256 IV
     // shELlnEverDaNCEwiThUsagAIN
@@ -330,8 +329,8 @@ void decrypt_message_xor_key()
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *base64_decode_type_a(const char *input, int length, int *out_len)
-{
+unsigned char *
+base64_decode_type_a(const char *input, int length, int *out_len) {
     FAKE_CALL;
 
     BIO *b64, *bmem;
@@ -371,8 +370,7 @@ unsigned char *base64_decode_type_a(const char *input, int length, int *out_len)
  *
  * @param[in] message the message to decrypt and print
  */
-void decrypt_print(const char *message)
-{
+void decrypt_print(const char *message) {
     FAKE_CALL;
     decrypt_message_xor_key();
 
@@ -400,8 +398,7 @@ void decrypt_print(const char *message)
  * @return 1
  */
 static int
-handle_encryption_errors(EVP_CIPHER_CTX *ctx, unsigned char **plaintext)
-{
+handle_encryption_errors(EVP_CIPHER_CTX *ctx, unsigned char **plaintext) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
 
@@ -425,8 +422,7 @@ void xtea_decipher(
     unsigned int num_rounds,
     uint32_t v[2],
     uint32_t const key[4]
-)
-{
+) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_A;
 
@@ -457,8 +453,7 @@ int aes_256_cbc_decrypt(
     int ciphertext_len,
     unsigned char **plaintext,
     int *plaintext_len
-)
-{
+) {
     FAKE_CALL;
 
     // decrypt the AES 256 key using XTEA and append it to the xor key
@@ -649,8 +644,8 @@ int aes_256_cbc_decrypt(
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *base64_decode_type_b(const char *input, int length, int *out_len)
-{
+unsigned char *
+base64_decode_type_b(const char *input, int length, int *out_len) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
 
@@ -699,8 +694,7 @@ int sha256_hash(
     const unsigned char *data,
     size_t data_len,
     unsigned char output[SHA256_DIGEST_LENGTH]
-)
-{
+) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_A;
 
@@ -737,8 +731,8 @@ int sha256_hash(
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *base64_decode_type_c(const char *input, int length, int *out_len)
-{
+unsigned char *
+base64_decode_type_c(const char *input, int length, int *out_len) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
 
@@ -781,8 +775,7 @@ unsigned char *base64_decode_type_c(const char *input, int length, int *out_len)
  * @param[in] signature the base64-encoded encrypted signature
  * @return 0 if the token is valid, 1 otherwise
  */
-int validate(const char *name, const char *signature)
-{
+int validate(const char *name, const char *signature) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
 
@@ -831,8 +824,7 @@ int validate(const char *name, const char *signature)
     RETURN(result);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     // special fake call for entry point
     __asm__ volatile(
         "movq $0f, %rax\n"

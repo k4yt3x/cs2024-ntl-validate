@@ -12,8 +12,7 @@
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *base64_decode(const char *input, int length, int *out_len)
-{
+unsigned char *base64_decode(const char *input, int length, int *out_len) {
     BIO *b64, *bmem;
 
     b64 = BIO_new(BIO_f_base64());
@@ -57,8 +56,7 @@ static int handle_encryption_errors(
     const char *message,
     EVP_CIPHER_CTX *ctx,
     unsigned char **plaintext
-)
-{
+) {
     if (plaintext && *plaintext) {
         free(*plaintext);
         *plaintext = NULL;
@@ -95,8 +93,7 @@ int aes_256_cbc_decrypt(
     unsigned char *iv,
     unsigned char **plaintext,
     int *plaintext_len
-)
-{
+) {
     if (ciphertext_len <= 0) {
         fprintf(stderr, "Invalid ciphertext length.\n");
         return 1;
@@ -152,8 +149,7 @@ int sha256_hash(
     const unsigned char *data,
     size_t data_len,
     unsigned char output[SHA256_DIGEST_LENGTH]
-)
-{
+) {
     EVP_MD_CTX *mdctx;
     unsigned int output_len;
 
@@ -180,8 +176,7 @@ int sha256_hash(
     return 0;
 }
 
-int validate_token(char *input)
-{
+int validate_token(char *input) {
     // split the input into token and signature
     char *token = strtok(input, ".");
     char *signature = strtok(NULL, ".");

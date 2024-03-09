@@ -7,8 +7,7 @@
 #include <string.h>
 
 unsigned char *
-base64_encode(const unsigned char *input, int length, int *out_len)
-{
+base64_encode(const unsigned char *input, int length, int *out_len) {
     BIO *bmem, *b64;
 
     b64 = BIO_new(BIO_f_base64());
@@ -40,8 +39,7 @@ void aes_256_cbc_encrypt(
     unsigned char *iv,
     unsigned char **ciphertext,
     int *ciphertext_len
-)
-{
+) {
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
         unsigned long err_code = ERR_get_error();
@@ -87,8 +85,7 @@ void sha256_hash(
     const unsigned char *data,
     size_t data_len,
     unsigned char output[SHA256_DIGEST_LENGTH]
-)
-{
+) {
     EVP_MD_CTX *mdctx;
     unsigned int output_len;
 
@@ -118,8 +115,7 @@ void sha256_hash(
     EVP_MD_CTX_free(mdctx);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <token>\n", argv[0]);
         return 1;
