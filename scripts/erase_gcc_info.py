@@ -13,4 +13,4 @@ replaced_data = pattern.sub(lambda m: b"\x00" * len(m.group()), binary_data)
 with open(BINARY_PATH, "wb") as file:
     file.write(replaced_data)
 
-print("Pattern replaced.")
+print("Erased compiler information.")

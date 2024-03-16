@@ -3,13 +3,19 @@
 SRCDIR=src
 BINDIR=bin
 
-static:
-	mkdir -p $(BINDIR)
-	gcc -Wall -fPIC -I$(SRCDIR) -no-pie -static -s $(SRCDIR)/validate.c -o $(BINDIR)/validate -L/home/k4yt3x/projects/cybersci/openssl -lssl -lcrypto
-
 dynamic:
 	mkdir -p $(BINDIR)
 	gcc -Wall -fPIC -I$(SRCDIR) -no-pie -lssl -lcrypto -s $(SRCDIR)/validate.c -o $(BINDIR)/validate
+	python scripts/erase_gcc_info.py
+	bash scripts/copy_phony_symbols.sh
+	upx bin/validate
+
+static:
+	mkdir -p $(BINDIR)
+	gcc -Wall -fPIC -I$(SRCDIR) -no-pie -static -s $(SRCDIR)/validate.c -o $(BINDIR)/validate -L/home/k4yt3x/projects/cybersci/openssl -lssl -lcrypto
+	python scripts/erase_gcc_info.py
+	bash scripts/copy_phony_symbols.sh
+	upx bin/validate
 
 debug:
 	mkdir -p $(BINDIR)
