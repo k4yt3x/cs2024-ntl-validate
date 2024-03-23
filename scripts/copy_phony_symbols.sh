@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SOURCE_FILE="data/cataclysm-tiles"
+SOURCE_FILE="data/dvmcmd"
 TARGET_FILE="bin/validate"
 TEMP_DIR="./temp_section_files"
 
