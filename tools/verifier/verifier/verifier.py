@@ -28,7 +28,7 @@ def validate():
         # call the validate_token function
         is_valid = (
             subprocess.run(
-                ["../bin/validate", str(token)],
+                ["../../bin/validate", str(token)],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 check=False,
