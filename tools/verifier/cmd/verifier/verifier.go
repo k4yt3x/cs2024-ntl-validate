@@ -506,7 +506,11 @@ func main() {
 			return
 		}
 
-		context.JSON(200, gin.H{"is_valid": isValid})
+		status := 200
+		if !isValid {
+			status = 400
+		}
+		context.JSON(status, gin.H{"is_valid": isValid})
 	})
 
 	// register route to get challenges
