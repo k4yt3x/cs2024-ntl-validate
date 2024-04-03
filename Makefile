@@ -10,11 +10,22 @@ UPX_COMPRESS=0
 dynamic:
 	mkdir -p $(BINDIR)
 	gcc -Wall -fPIC -I$(SRCDIR) -no-pie -lssl -lcrypto -s $(SRCDIR)/validate.c -o $(BINDIR)/validate
-	python scripts/erase_gcc_info.py
+	objcopy \
+		--remove-section .comment \
+		--remove-section .eh_frame \
+		--remove-section .eh_frame_hdr \
+		--remove-section .gnu.hash \
+		--remove-section .note.ABI-tag \
+		--remove-section .note.gnu.build-id \
+		--remove-section .note.gnu.property \
+		--remove-section .shstrtab \
+		bin/validate bin/temp
+	mv bin/temp bin/validate
 ifeq ($(COPY_PHONY_SYMBOLS),1)
 	bash scripts/copy_phony_symbols.sh
 endif
 ifeq ($(UPX_COMPRESS),1)
+	# UPX will not work if the .note.gnu.build-id section is removed
 	upx bin/validate
 endif
 
