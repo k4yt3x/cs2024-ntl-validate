@@ -1,0 +1,20 @@
+[project]
+name = "solver"
+description = "Example solution solver"
+authors = [{ name = "k4yt3x", email = "i@k4yt3x.com" }]
+dependencies = [
+    "requests>=2.31.0",
+    "cryptography>=42.0.5",
+]
+requires-python = ">=3.7"
+readme = "README.md"
+license = { text = "Proprietary" }
+dynamic = ["version"]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+version = { source = "file", path = "solver/__init__.py" }
