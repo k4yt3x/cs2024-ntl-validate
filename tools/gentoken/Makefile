@@ -3,7 +3,7 @@ CFLAGS=-Wall -fPIC -Isrc
 LDFLAGS=-no-pie -lssl -lcrypto
 LIBNAME=gentoken
 SRCDIR=src
-BINDIR=../bin
+BINDIR=../../bin
 
 # Object file for the library
 OBJ=$(SRCDIR)/gentoken.o
