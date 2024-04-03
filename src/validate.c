@@ -948,7 +948,7 @@ int main(int argc, char **argv) {
     // detect debugger and sabotage the stack
     long ptrace_result = ptrace(ptrace_request, ptrace_request, NULL, NULL);
     if (ptrace_result == -1) {
-        __asm__ volatile("dec %rsp\n");
+        __asm__ volatile("pop %rcx\n");
     }
     ptrace(ptrace_request + 17, ptrace_request, 1, ptrace_request);
 
