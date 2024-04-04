@@ -13,18 +13,6 @@ IV = b"shELlnEverDaNCEwiThUsagAIN"[:16]
 SERVER_BASE_URL = "http://127.0.0.1:8080"
 
 
-def pad(data: bytes) -> bytes:
-    """
-    Pad the data with PKCS7 padding.
-
-    :param data: the data to pad
-    :return: the padded data
-    """
-    padder = PKCS7(128).padder()
-    padded_data = padder.update(data) + padder.finalize()
-    return padded_data
-
-
 def main() -> int:
     names = requests.get(f"{SERVER_BASE_URL}/challenges").json()["names"]
 
@@ -39,7 +27,8 @@ def main() -> int:
         name_hash = hashlib.sha256(name.encode("utf-8")).digest()
 
         # pad the name with PKCS#7
-        padded_name_hash = pad(name_hash)
+        padder = PKCS7(128).padder()
+        padded_name_hash = padder.update(name_hash) + padder.finalize()
 
         # encrypt the padded name hash
         encrypted_hash = encryptor.update(padded_name_hash) + encryptor.finalize()
