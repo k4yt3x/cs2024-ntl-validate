@@ -8,20 +8,30 @@ import requests
 
 SERVER_BASE_URL = "http://127.0.0.1:8080"
 
-names = requests.get(f"{SERVER_BASE_URL}/challenges", timeout=3).json()["names"]
+
+def generate_token(name: str) -> str:
+    """
+    Generate the token for the given name.
+    """
+
+    # TODO: implement the logic to generate the token for the name
+    return "?"
+
+
+names = requests.get(f"{SERVER_BASE_URL}/challenge", timeout=3).json()["names"]
 
 tokens = []
 for name in names:
 
-    # TODO: implement the logic to generate the token for the name
-    token = "?"
+    # generate the token for the name
+    token = generate_token(name)
 
     # save the token to the dictionary
     tokens.append({"name": name, "token": token})
 
 # send the tokens to the server to answer the challenge
 response = requests.post(
-    f"{SERVER_BASE_URL}/challenges", json={"submissions": tokens}, timeout=3
+    f"{SERVER_BASE_URL}/challenge", json={"submissions": tokens}, timeout=3
 )
 response_json = response.json()
 

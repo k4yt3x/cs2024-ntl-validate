@@ -13,40 +13,54 @@ IV = b"shELlnEverDaNCEwiThUsagAIN"[:16]
 SERVER_BASE_URL = "http://127.0.0.1:8080"
 
 
+def generate_token(name: str) -> str:
+    """
+    Generate the token for the given name.
+
+    :param name: the name of the participant
+    :return: the token for the name
+    """
+
+    # use AES-256 in CBC mode
+    cipher = Cipher(algorithms.AES(KEY), modes.CBC(IV), backend=default_backend())
+    encryptor = cipher.encryptor()
+
+    # hash the name with SHA-256
+    name_hash = hashlib.sha256(name.encode("utf-8")).digest()
+
+    # pad the name with PKCS#7
+    padder = PKCS7(128).padder()
+    padded_name_hash = padder.update(name_hash) + padder.finalize()
+
+    # encrypt the padded name hash
+    encrypted_hash = encryptor.update(padded_name_hash) + encryptor.finalize()
+
+    # encode the encrypted hash with base64
+    encoded_encrypted_hash = base64.b64encode(encrypted_hash).decode()
+
+    # concatenate the base64-encoded name and the base64-encoded encrypted hash
+    token = "{}.{}".format(
+        base64.b64encode(name.encode("utf-8")).decode(), encoded_encrypted_hash
+    )
+
+    return token
+
+
 def main() -> int:
-    names = requests.get(f"{SERVER_BASE_URL}/challenges").json()["names"]
+    names = requests.get(f"{SERVER_BASE_URL}/challenge").json()["names"]
 
     tokens = []
     for name in names:
 
-        # use AES-256 in CBC mode
-        cipher = Cipher(algorithms.AES(KEY), modes.CBC(IV), backend=default_backend())
-        encryptor = cipher.encryptor()
-
-        # hash the name with SHA-256
-        name_hash = hashlib.sha256(name.encode("utf-8")).digest()
-
-        # pad the name with PKCS#7
-        padder = PKCS7(128).padder()
-        padded_name_hash = padder.update(name_hash) + padder.finalize()
-
-        # encrypt the padded name hash
-        encrypted_hash = encryptor.update(padded_name_hash) + encryptor.finalize()
-
-        # encode the encrypted hash with base64
-        encoded_encrypted_hash = base64.b64encode(encrypted_hash).decode()
-
-        # concatenate the base64-encoded name and the base64-encoded encrypted hash
-        token = "{}.{}".format(
-            base64.b64encode(name.encode("utf-8")).decode(), encoded_encrypted_hash
-        )
+        # generate the token for the name
+        token = generate_token(name)
 
         # save the token to the dictionary
         tokens.append({"name": name, "token": token})
 
     # send the tokens to the server to answer the challenge
     response = requests.post(
-        f"{SERVER_BASE_URL}/challenges", json={"submissions": tokens}
+        f"{SERVER_BASE_URL}/challenge", json={"submissions": tokens}
     )
     response_json = response.json()
 
