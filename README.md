@@ -14,7 +14,10 @@ However, just days before the conference, the binary for the validation program 
 
 Each token contains the name of the participant and other information required to verify the authenticity of the token. There are multiple stages to this challenge. Completing each stage will grant you a flag.
 
-A valid token has been leaked with the binary, which could be useful for your analysis: `Sm9obiBEb2U=.CIZlTtWUaGD7XFHRCK/gob2EKpmMYcudT6sWtAOfTynh5RAMx1FXIUJr+Vo43RvG`. This token is for the name `John Doe`.
+A few valid tokens have been leaked with the binary, which could be useful for your analysis:
+
+- John Doe: `Sm9obiBEb2U=.CIZlTtWUaGD7XFHRCK/gob2EKpmMYcudT6sWtAOfTynh5RAMx1FXIUJr+Vo43RvG`
+- TEST: `VEVTVA==.d3/ErvFXeG78/APAPAnXH+J4QvfYQA6F64XSgSUY9y+Bb9OHzYQmKvELj9soPSfX`
 
 ### Stage 1: Finding the Key
 
