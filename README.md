@@ -31,13 +31,13 @@ Your ultimate goal in this challenge is to understand the signing process and be
 
 To help you save some time, a Python template script `solver_template.py` has been provided. You only need to focus on implementing the `generate_token` function, which takes a name as input and returns the token as output. In case you want to implement your own solution from scratch, the API specification is provided in Appendix A.
 
-### Appendix A: API Endpoints
+## Appendix A: API Endpoints
 
-#### `POST /validate`
+### `POST /validate`
 
 Validates a token. Returns a JSON object with a boolean field `valid` indicating whether the token is valid. If the token is invalid, the server returns status code 400. If the token is valid, the server returns status code 200.
 
-##### Request
+#### Request
 
 ```json
 {
@@ -45,7 +45,7 @@ Validates a token. Returns a JSON object with a boolean field `valid` indicating
 }
 ```
 
-##### Response
+#### Response
 
 ```json
 {
@@ -53,11 +53,11 @@ Validates a token. Returns a JSON object with a boolean field `valid` indicating
 }
 ```
 
-#### `GET /challenge`
+### `GET /challenge`
 
 Returns a JSON object with a list of 100 random names.
 
-##### Response
+#### Response
 
 ```json
 {
@@ -71,11 +71,11 @@ Returns a JSON object with a list of 100 random names.
 }
 ```
 
-#### `POST /challenge`
+### `POST /challenge`
 
 Validates the submissions for the challenge. Returns status code 400 with a JSON object with a string field `error` containing an error message if any of the submissions are incorrect. Returns status code 200 with a JSON object with a string field `flag` if all of the submissions are correct.
 
-##### Request
+#### Request
 
 ```json
 {
@@ -101,7 +101,7 @@ Validates the submissions for the challenge. Returns status code 400 with a JSON
 }
 ```
 
-##### Response
+#### Response
 
 If any of the submissions are incorrect:
 
