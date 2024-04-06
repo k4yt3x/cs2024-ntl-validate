@@ -1,6 +1,5 @@
 # Built-binaries
 bin/
-data/
 
 # Prerequisites
 *.d
