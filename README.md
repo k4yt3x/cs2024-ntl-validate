@@ -4,9 +4,9 @@ A reverse engineering challenge written for the CyberSCI 2024 Nationals competit
 
 ## Challenge Background Story
 
-The CSides 2024 conference is approaching. Previously, CSides would simply issue badges bearing the participants' names and then check to see if the name matched their driver's license, without any means to cryptographically verify the badges' authenticity. Many participants printed their own badges and saved $1,500 for each ticket. The organizers weren't very happy about this.
+The CSides 2024 conference is approaching. Previously, CSides would simply issue badges bearing the participants' names and then check to see if the name matched their driver's license, without any means to verify the badges' authenticity. Many participants printed their own badges and saved $1,500 for each ticket. The organizers weren't very happy about this.
 
-An insider has revealed that they've upgraded their system this time, implementing a new validation mechanism. Each participant is assigned a token that contains a cryptographic signature of their name. Upon entering the conference, the participant's name on the token is first compared with their ID, and then the token is validated using a secret program.
+An insider has revealed that they've upgraded their system this time, implementing a new validation mechanism. Each participant is given a token that contains a cryptographic signature of their name. Upon entering the conference, the participant's name on the token is first compared with their ID, and then the token is validated using a secret program.
 
 However, just days before the conference, the binary for the validation program was unintentionally leaked due to some DevOps mishap. The binary appears to be obfuscated, so surely nobody will be able to figure out the signing process and create valid tokens to gain free access to the conference...right?
 
@@ -32,26 +32,6 @@ Your ultimate goal in this challenge is to understand the signing process and be
 To help you save some time, a Python template script `solver_template.py` has been provided. You only need to focus on implementing the `generate_token` function, which takes a name as input and returns the token as output. In case you want to implement your own solution from scratch, the API specification is provided in Appendix A.
 
 ## Appendix A: API Endpoints
-
-### `POST /validate`
-
-Validates a token. Returns a JSON object with a boolean field `valid` indicating whether the token is valid. If the token is invalid, the server returns status code 400. If the token is valid, the server returns status code 200.
-
-#### Request
-
-```json
-{
-  "token": "Sm9obiBEb2U=.CIZlTtWUaGD7XFHRCK/gob2EKpmMYcudT6sWtAOfTynh5RAMx1FXIUJr+Vo43RvG"
-}
-```
-
-#### Response
-
-```json
-{
-  "valid": true
-}
-```
 
 ### `GET /challenge`
 
@@ -117,5 +97,25 @@ If all of the submissions are correct:
 {
   "message": "All submissions are valid!",
   "flag": "flag{...}"
+}
+```
+
+### `POST /validate`
+
+Validates a token. This endpoint is used for testing purposes only. Returns a JSON object with a boolean field `valid` indicating whether the token is valid. If the token is invalid, the server returns status code 400. If the token is valid, the server returns status code 200.
+
+#### Request
+
+```json
+{
+  "token": "Sm9obiBEb2U=.CIZlTtWUaGD7XFHRCK/gob2EKpmMYcudT6sWtAOfTynh5RAMx1FXIUJr+Vo43RvG"
+}
+```
+
+#### Response
+
+```json
+{
+  "valid": true
 }
 ```
