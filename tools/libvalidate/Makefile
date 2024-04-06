@@ -1,5 +1,5 @@
 SRCDIR=src
-BINDIR=../bin
+BINDIR=../../bin
 
 build:
 	gcc -shared -Wall -fPIC -I$(SRCDIR) -lssl -lcrypto -s $(SRCDIR)/libvalidate.c -o $(BINDIR)/libvalidate.so
