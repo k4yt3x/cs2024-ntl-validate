@@ -510,11 +510,11 @@ func main() {
 		if !isValid {
 			status = 400
 		}
-		context.JSON(status, gin.H{"is_valid": isValid})
+		context.JSON(status, gin.H{"valid": isValid})
 	})
 
 	// register route to get challenges
-	router.GET("/challenges", func(context *gin.Context) {
+	router.GET("/challenge", func(context *gin.Context) {
 		log.Debug().Msg("Generating challenge names")
 		names := generateNames()
 		log.Debug().Str("names", strings.Join(names[:3], ", ")+"...").Msg("Generated names")
@@ -522,7 +522,7 @@ func main() {
 	})
 
 	// register route to submit challenge answers
-	router.POST("/challenges", func(context *gin.Context) {
+	router.POST("/challenge", func(context *gin.Context) {
 		log.Debug().Msg("Validating submission")
 
 		// unmarshal submission JSON into struct
@@ -596,7 +596,7 @@ func main() {
 		}
 
 		log.Info().Msg("All names validated, sending flag")
-		context.JSON(200, gin.H{"message": "All valid!", "flag": secretFlag})
+		context.JSON(200, gin.H{"message": "All submissions are valid!", "flag": secretFlag})
 	})
 
 	// start the server
