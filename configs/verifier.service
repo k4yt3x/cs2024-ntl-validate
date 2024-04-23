@@ -1,0 +1,14 @@
+[Unit]
+Description=Verifier
+Requires=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/verifier /usr/local/bin/validate
+User=nobody
+Group=nogroup
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
