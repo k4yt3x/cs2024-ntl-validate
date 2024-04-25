@@ -47,7 +47,7 @@
 //   - the XTEA key for decrypting the AES 256 key
 unsigned char MESSAGE_XOR_KEY[59];
 
-void decrypt_message_xor_key() {
+static inline __attribute__((always_inline)) void decrypt_message_xor_key() {
     // decrypt the xor key
     // this is used both as the message decryption key and the AES 256 IV
     // shELlnEverDaNCEwiThUsagAIN
@@ -329,8 +329,7 @@ void decrypt_message_xor_key() {
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *
-base64_decode_type_a(const char *input, int length, int *out_len) {
+static inline unsigned char *base64_decode_type_a(const char *input, int length, int *out_len) {
     FAKE_CALL;
 
     BIO *b64, *bmem;
@@ -370,7 +369,7 @@ base64_decode_type_a(const char *input, int length, int *out_len) {
  *
  * @param[in] message the message to decrypt and print
  */
-void decrypt_print(const char *message) {
+static inline __attribute__((always_inline)) void decrypt_print(const char *message) {
     FAKE_CALL;
     decrypt_message_xor_key();
 
@@ -397,7 +396,7 @@ void decrypt_print(const char *message) {
  * @param[in] plaintext decrypted content
  * @return 1
  */
-static int
+static inline __attribute__((always_inline)) int
 handle_encryption_errors(EVP_CIPHER_CTX *ctx, unsigned char **plaintext) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
@@ -418,11 +417,8 @@ handle_encryption_errors(EVP_CIPHER_CTX *ctx, unsigned char **plaintext) {
  *
  * @param[in] num_rounds the number of encryption rounds
  */
-void xtea_decipher(
-    unsigned int num_rounds,
-    uint32_t v[2],
-    uint32_t const key[4]
-) {
+static inline __attribute__((always_inline)) void
+xtea_decipher(unsigned int num_rounds, uint32_t v[2], uint32_t const key[4]) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_A;
 
@@ -448,7 +444,7 @@ void xtea_decipher(
  * @param[out] plaintext_len length of the decrypted content
  * @return 0 on success, 1 on failure
  */
-int aes_256_cbc_decrypt(
+static inline __attribute__((always_inline)) int aes_256_cbc_decrypt(
     unsigned char *ciphertext,
     int ciphertext_len,
     unsigned char **plaintext,
@@ -556,9 +552,8 @@ int aes_256_cbc_decrypt(
 
     // decode the encrypted flag data
     int out_len = 0;
-    unsigned char *decoded_data = base64_decode_type_a(
-        encoded_encrypted_data, strlen(encoded_encrypted_data), &out_len
-    );
+    unsigned char *decoded_data =
+        base64_decode_type_a(encoded_encrypted_data, strlen(encoded_encrypted_data), &out_len);
 
     // decrypt the flag data using XTEA
     for (int i = 0; i < out_len; i += 8) {
@@ -579,8 +574,9 @@ int aes_256_cbc_decrypt(
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     int temp_len = 0;
 
-    if (!ctx)
+    if (!ctx) {
         RETURN(handle_encryption_errors(NULL, NULL));
+    }
 
     *plaintext = (unsigned char *)malloc(ciphertext_len);
     if (!*plaintext) {
@@ -604,11 +600,7 @@ int aes_256_cbc_decrypt(
     cipher = (EVP_CIPHER *)EVP_aes_256_cbc();
 
     if (1 != EVP_DecryptInit_ex(
-                 ctx,
-                 (const EVP_CIPHER *)cipher,
-                 NULL,
-                 MESSAGE_XOR_KEY + 26,
-                 MESSAGE_XOR_KEY
+                 ctx, (const EVP_CIPHER *)cipher, NULL, MESSAGE_XOR_KEY + 26, MESSAGE_XOR_KEY
              )) {
         RETURN(handle_encryption_errors(ctx, plaintext));
     }
@@ -622,9 +614,7 @@ int aes_256_cbc_decrypt(
         : "r"(temp_len)
     );
 
-    if (1 != EVP_DecryptUpdate(
-                 ctx, *plaintext, plaintext_len, ciphertext, ciphertext_len
-             )) {
+    if (1 != EVP_DecryptUpdate(ctx, *plaintext, plaintext_len, ciphertext, ciphertext_len)) {
         RETURN(handle_encryption_errors(ctx, plaintext));
     }
 
@@ -644,8 +634,7 @@ int aes_256_cbc_decrypt(
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *
-base64_decode_type_b(const char *input, int length, int *out_len) {
+static inline unsigned char *base64_decode_type_b(const char *input, int length, int *out_len) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
 
@@ -690,7 +679,7 @@ base64_decode_type_b(const char *input, int length, int *out_len) {
  * @param[out] output SHA256 hash
  * @return 0 on success, 1 on failure
  */
-int sha256_hash(
+static inline __attribute__((always_inline)) int sha256_hash(
     const unsigned char *data,
     size_t data_len,
     unsigned char output[SHA256_DIGEST_LENGTH]
@@ -731,7 +720,7 @@ int sha256_hash(
  * @param[in] length length of the input string
  * @param[out] out_len length of the decoded content
  */
-unsigned char *
+static inline __attribute__((always_inline)) unsigned char *
 base64_decode_type_c(const char *input, int length, int *out_len) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
@@ -775,14 +764,13 @@ base64_decode_type_c(const char *input, int length, int *out_len) {
  * @param[in] signature the base64-encoded encrypted signature
  * @return 0 if the token is valid, 1 otherwise
  */
-int validate(const char *name, const char *signature) {
+static inline int validate(const char *name, const char *signature) {
     FAKE_CALL;
     FAKE_INVALID_JUMP_B;
 
     // base64 decode the token
     int token_len = 0;
-    unsigned char *decoded_token =
-        base64_decode_type_b(name, strlen(name), &token_len);
+    unsigned char *decoded_token = base64_decode_type_b(name, strlen(name), &token_len);
 
     // base64 decode the signature
     int signature_len = 0;
@@ -790,8 +778,7 @@ int validate(const char *name, const char *signature) {
         base64_decode_type_c(signature, strlen(signature), &signature_len);
 
     // decrypt the signature
-    unsigned char *decrypted_signature =
-        (unsigned char *)malloc(SHA256_DIGEST_LENGTH);
+    unsigned char *decrypted_signature = (unsigned char *)malloc(SHA256_DIGEST_LENGTH);
     if (!decrypted_signature) {
         // memory allocation failed for decrypted signature
         RETURN(2);
