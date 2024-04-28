@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import base64
 import hashlib
+import os
 
 import requests
 from cryptography.hazmat.backends import default_backend
@@ -10,7 +11,7 @@ from cryptography.hazmat.primitives.padding import PKCS7
 
 KEY = b"flag{ReADiNg_AsM_aiNt_thAT_HarD}"
 IV = b"shELlnEverDaNCEwiThUsagAIN"[:16]
-SERVER_BASE_URL = "http://127.0.0.1:8080"
+SERVER_BASE_URL = os.environ.get("SERVER_BASE_URL", "http://127.0.0.1:8080")
 
 
 def generate_token(name: str) -> str:
