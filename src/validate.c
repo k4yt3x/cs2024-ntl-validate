@@ -1,8 +1,8 @@
+#define _GNU_SOURCE
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ptrace.h>
@@ -834,6 +834,7 @@ int main(int argc, char **argv) {
     );
 
     int ptrace_request = 16;
+    int syscall_id = ptrace_request;
 
     // break linear disassembly
     FAKE_INVALID_JUMP_A;
@@ -848,177 +849,10 @@ int main(int argc, char **argv) {
         : "rax"
     );
 
-    // the index is declared once for all messages
-    // since only one message will be printed
+    // memory and index for encrypted strings
     int index = 0;
-
-    if (argc != 2) {
-        // encrypted string: "Usage: ./validate [token]\n"
-        char message[37];
-        message[index] = 'J';
-        index++;
-        message[index] = 'h';
-        index++;
-        message[index] = 's';
-        index++;
-        message[index] = 'k';
-        index++;
-        message[index] = 'K';
-        index++;
-        message[index] = 'w';
-        index++;
-        message[index] = 'l';
-        index++;
-        message[index] = 'U';
-        index++;
-        message[index] = 'Z';
-        index++;
-        message[index] = 'V';
-        index++;
-        message[index] = 'h';
-        index++;
-        message[index] = 'K';
-        index++;
-        message[index] = 'B';
-        index++;
-        message[index] = 'C';
-        index++;
-        message[index] = 'U';
-        index++;
-        message[index] = 'N';
-        index++;
-        message[index] = 'J';
-        index++;
-        message[index] = 'y';
-        index++;
-        message[index] = 'c';
-        index++;
-        message[index] = 'k';
-        index++;
-        message[index] = 'A';
-        index++;
-        message[index] = 'w';
-        index++;
-        message[index] = 'x';
-        index++;
-        message[index] = '0';
-        index++;
-        message[index] = 'M';
-        index++;
-        message[index] = 'y';
-        index++;
-        message[index] = 'E';
-        index++;
-        message[index] = 'c';
-        index++;
-        message[index] = 'C';
-        index++;
-        message[index] = 'g';
-        index++;
-        message[index] = 'I';
-        index++;
-        message[index] = 'v';
-        index++;
-        message[index] = 'F';
-        index++;
-        message[index] = 'E';
-        index++;
-        message[index] = 'Q';
-        index++;
-        message[index] = '=';
-        index++;
-        message[index] = '\0';
-        decrypt_print(message);
-        RETURN(1);
-    }
-
-    // detect debugger and sabotage the stack
-    long ptrace_result = ptrace(ptrace_request, ptrace_request, NULL, NULL);
-    if (ptrace_result == -1) {
-        __asm__ volatile("pop %rcx\n");
-    }
-    ptrace(ptrace_request + 17, ptrace_request, 1, ptrace_request);
-
-    // split the input into token and signature
-    char *token = argv[1];
-    char *name = strtok(token, ".");
-    char *signature = strtok(NULL, ".");
-
-    if (!name || !signature) {
-        // encrypted string: "Invalid token format.\n"
-        char message[33];
-        message[index] = 'O';
-        index++;
-        message[index] = 'g';
-        index++;
-        message[index] = 'Y';
-        index++;
-        message[index] = 'z';
-        index++;
-        message[index] = 'L';
-        index++;
-        message[index] = 'Q';
-        index++;
-        message[index] = 'A';
-        index++;
-        message[index] = 'H';
-        index++;
-        message[index] = 'I';
-        index++;
-        message[index] = 'V';
-        index++;
-        message[index] = 'Y';
-        index++;
-        message[index] = 'R';
-        index++;
-        message[index] = 'H';
-        index++;
-        message[index] = 'S';
-        index++;
-        message[index] = '8';
-        index++;
-        message[index] = 'E';
-        index++;
-        message[index] = 'I';
-        index++;
-        message[index] = 'G';
-        index++;
-        message[index] = 'M';
-        index++;
-        message[index] = 'j';
-        index++;
-        message[index] = 'G';
-        index++;
-        message[index] = 'B';
-        index++;
-        message[index] = 's';
-        index++;
-        message[index] = '5';
-        index++;
-        message[index] = 'C';
-        index++;
-        message[index] = 'S';
-        index++;
-        message[index] = 'F';
-        index++;
-        message[index] = 'd';
-        index++;
-        message[index] = 'a';
-        index++;
-        message[index] = 'w';
-        index++;
-        message[index] = '=';
-        index++;
-        message[index] = '=';
-        index++;
-        message[index] = '\0';
-        decrypt_print(message);
-        RETURN(1);
-    }
-
-    int result = validate(name, signature);
-
     char message[60];
+
     // encrypted string: "The token is valid.\n"
     message[index] = 'J';
     index++;
@@ -1046,6 +880,7 @@ int main(int argc, char **argv) {
     index++;
     message[index] = 'U';
     index++;
+    syscall_id -= index;
     message[index] = 'i';
     index++;
     message[index] = '0';
@@ -1066,6 +901,7 @@ int main(int argc, char **argv) {
     index++;
     message[index] = 'A';
     index++;
+    syscall_id += index;
     message[index] = 'w';
     index++;
     message[index] = 'R';
@@ -1146,7 +982,197 @@ int main(int argc, char **argv) {
     index++;
     message[index] = '\0';
 
-    decrypt_print(message + (result == 1) * 29);
+    // detect debugger and sabotage the stack
 
+    // the old x64 syscall method to call ptrace
+    /*
+    long ptrace_result = syscall(syscall_id, ptrace_request, ptrace_request, NULL, NULL);
+    if (ptrace_result == -1) {
+        // compiles to a single byte 0x59
+        // will crash the program in a later function calls
+        __asm__ volatile("pop %rcx\n");
+    }
+    // syscall(syscall_id, ptrace_request, 1, ptrace_request);
+    */
+
+    // manually do a ptrace syscall and write result to ptrace_result
+    // using x86 `int 0x80` to perform the syscall to make it slightly less obvious
+    __asm__ volatile(
+        "movl %3, %%edx\n"
+        "movl %1, %%ebx\n"
+        "movl %0, %%eax\n"
+        "movl %2, %%ecx\n"
+        "int $0x80\n"
+        "cmp %%ecx, %%eax\n"
+        "jge 0f\n"
+        // compiles to a single byte 0x58
+        // will crash the program in a later function calls, likely within OpenSSH
+        "pop %%rax\n"
+        "0:\n"
+        :
+        : "r"(syscall_id), "r"(ptrace_request), "r"(ptrace_request), "r"((int)message[index])
+        : "eax", "ebx", "ecx", "edx"
+    );
+
+    // reset index back to 0 for future message strings
+    index = message[index];
+
+    if (argc != 2) {
+        // encrypted string: "Usage: ./validate [token]\n"
+        message[index] = 'J';
+        index++;
+        message[index] = 'h';
+        index++;
+        message[index] = 's';
+        index++;
+        message[index] = 'k';
+        index++;
+        message[index] = 'K';
+        index++;
+        message[index] = 'w';
+        index++;
+        message[index] = 'l';
+        index++;
+        message[index] = 'U';
+        index++;
+        message[index] = 'Z';
+        index++;
+        message[index] = 'V';
+        index++;
+        message[index] = 'h';
+        index++;
+        message[index] = 'K';
+        index++;
+        message[index] = 'B';
+        index++;
+        message[index] = 'C';
+        index++;
+        message[index] = 'U';
+        index++;
+        message[index] = 'N';
+        index++;
+        message[index] = 'J';
+        index++;
+        message[index] = 'y';
+        index++;
+        message[index] = 'c';
+        index++;
+        message[index] = 'k';
+        index++;
+        message[index] = 'A';
+        index++;
+        message[index] = 'w';
+        index++;
+        message[index] = 'x';
+        index++;
+        message[index] = '0';
+        index++;
+        message[index] = 'M';
+        index++;
+        message[index] = 'y';
+        index++;
+        message[index] = 'E';
+        index++;
+        message[index] = 'c';
+        index++;
+        message[index] = 'C';
+        index++;
+        message[index] = 'g';
+        index++;
+        message[index] = 'I';
+        index++;
+        message[index] = 'v';
+        index++;
+        message[index] = 'F';
+        index++;
+        message[index] = 'E';
+        index++;
+        message[index] = 'Q';
+        index++;
+        message[index] = '=';
+        index++;
+        message[index] = '\0';
+        decrypt_print(message);
+        RETURN(1);
+    }
+
+    // split the input into token and signature
+    char *token = argv[1];
+    char *name = strtok(token, ".");
+    char *signature = strtok(NULL, ".");
+
+    if (!name || !signature) {
+        // encrypted string: "Invalid token format.\n"
+        message[index] = 'O';
+        index++;
+        message[index] = 'g';
+        index++;
+        message[index] = 'Y';
+        index++;
+        message[index] = 'z';
+        index++;
+        message[index] = 'L';
+        index++;
+        message[index] = 'Q';
+        index++;
+        message[index] = 'A';
+        index++;
+        message[index] = 'H';
+        index++;
+        message[index] = 'I';
+        index++;
+        message[index] = 'V';
+        index++;
+        message[index] = 'Y';
+        index++;
+        message[index] = 'R';
+        index++;
+        message[index] = 'H';
+        index++;
+        message[index] = 'S';
+        index++;
+        message[index] = '8';
+        index++;
+        message[index] = 'E';
+        index++;
+        message[index] = 'I';
+        index++;
+        message[index] = 'G';
+        index++;
+        message[index] = 'M';
+        index++;
+        message[index] = 'j';
+        index++;
+        message[index] = 'G';
+        index++;
+        message[index] = 'B';
+        index++;
+        message[index] = 's';
+        index++;
+        message[index] = '5';
+        index++;
+        message[index] = 'C';
+        index++;
+        message[index] = 'S';
+        index++;
+        message[index] = 'F';
+        index++;
+        message[index] = 'd';
+        index++;
+        message[index] = 'a';
+        index++;
+        message[index] = 'w';
+        index++;
+        message[index] = '=';
+        index++;
+        message[index] = '=';
+        index++;
+        message[index] = '\0';
+        decrypt_print(message);
+        RETURN(1);
+    }
+
+    int result = validate(name, signature);
+    decrypt_print(message + (result == 1) * 29);
     RETURN(result);
 }
