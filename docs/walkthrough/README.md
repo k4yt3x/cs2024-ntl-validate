@@ -14,7 +14,7 @@ When the CPU executes these instructions, it first reaches `0xEB` which is a two
 
 In practice, such junk code will result in linear disassemblers producing incorrect results (e.g., IDA Pro). Non-linear disassemblers like Radare2 and Binary Ninja do not suffer the same issues as much. Disassembly after junk code may be incorrect, or represented as raw data because the disassembler cannot interpret the bytes.
 
-![[junk_code_example.png]]
+![](images/junk_code_example.png)
 
 Junk codes like these are spread out throughout the entire file. They make the disassembly unreadable. Participants need to successfully identify these obfuscation patterns and make use of IDAPython or other similar automated tools to NOP-patch these junk codes in bulk to make the file readable. For instance, the following IDAPython script can be used to patch the `0xEB, 0xFF, 0xC0` pattern:
 
@@ -30,12 +30,12 @@ def nops_out_junk_bytes():
     for seg in Segments():
         seg_start = get_segm_start(seg)
         seg_end = get_segm_end(seg)
-        
+
         ea = seg_start
         while ea < seg_end:
             # Read 3 bytes from the current address
             bytes = get_bytes(ea, 3)
-            
+
             if bytes is None or len(bytes) < 3:
                 ea += 1
                 continue
@@ -44,7 +44,7 @@ def nops_out_junk_bytes():
             # Replace 0xEB with 0x90 (NOP)
             if bytes[0] == 0xEB and bytes[1] == 0xFF and bytes[2] == 0xC0:
                 patch_byte(ea, 0x90)
-            
+
             ea += 1
 
 nops_out_junk_bytes()
@@ -52,11 +52,11 @@ nops_out_junk_bytes()
 
 With automated and manual junk code patching, the program's bytes can be gradually converted into normal readable disassembly:
 
-![](corrected_disassembly.png)
+![](images/corrected_disassembly.png)
 
 From this point onward, the participants can read the assembly or, optionally, patch the program to a state where IDA can correctly identify the subroutine boundaries and run decompilers on the functions. The latter could be difficult. The participants will find that this program contains strings hinting that OpenSSL is statically linked, indicating that one of the algorithms in OpenSSL may be used to sign the token.
 
-![](openssl_strings.png)
+![](images/openssl_strings.png)
 
 From here, it may be helpful for the participants to use a debugger to step through the program to figure out the contents of the concatenated strings and decrypted keys in the memory. This program uses AES-256-CBC to encrypt the SHA-256 hash of the user's name. Participants can catch the IV and AES key used when the function `EVP_DecryptInit_ex` is called. The IV and the AES encryption key are stored in the same chunk of memory without null byte separation. They are passed to the `EVP_DecryptInit_ex` with offsets pointing to different portions of the memory chunk:
 
@@ -68,7 +68,7 @@ The first half of the memory will get decrypted before the AES key and will be n
 
 It is also worth mentioning that this program also has countermeasures against dynamic analysis (debuggers). It achieves this through sabotaging the program's stack if `ptrace(PTRACE_TRACEME);` returns `-1`, indicating that a debugger is already attached. Attempting to debug the program without patching this check will result in a confusing segfault happening later in the program:
 
-![](anti_debug_segfault.png)
+![](images/anti_debug_segfault.png)
 
 The `ptrace` call is obfuscated and called via a x86 syscall instead of a direct `ptrace` call. The syscall ID is calculated dynamically during the program's execution. The participants will need to patch these checks in order to be able to debug the program.
 
