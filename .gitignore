@@ -1,5 +1,5 @@
 # Built-binaries
-bin/
+#bin/
 
 # Prerequisites
 *.d
@@ -27,7 +27,7 @@ bin/
 
 # Shared objects (inc. Windows DLLs)
 *.dll
-*.so
+#*.so
 *.so.*
 *.dylib
 
