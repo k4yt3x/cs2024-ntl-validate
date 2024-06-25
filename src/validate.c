@@ -1006,7 +1006,7 @@ int main(int argc, char **argv) {
         "cmp %%ecx, %%eax\n"
         "jge 0f\n"
         // compiles to a single byte 0x58
-        // will crash the program in a later function calls, likely within OpenSSH
+        // will crash the program in a later function calls, likely within OpenSSL
         "pop %%rax\n"
         "0:\n"
         :
